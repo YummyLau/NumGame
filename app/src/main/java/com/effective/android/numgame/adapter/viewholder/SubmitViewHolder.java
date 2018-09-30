@@ -38,6 +38,9 @@ public class SubmitViewHolder extends RecyclerView.ViewHolder {
                 submitString.append(submitItem.abResult.first + "A");
                 submitString.append(submitItem.abResult.second + "B");
             }
+            if (!TextUtils.isEmpty(submitItem.message)) {
+                submitString.append(" " + submitItem.message);
+            }
             textView.setText(submitString.toString());
         }
     }

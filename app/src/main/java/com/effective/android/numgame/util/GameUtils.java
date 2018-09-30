@@ -1,8 +1,12 @@
 package com.effective.android.numgame.util;
 
+import android.net.wifi.aware.PublishConfig;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Pair;
+
+import com.effective.android.numgame.bean.SubmitFeedBack;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,10 +50,8 @@ public class GameUtils {
         return new Pair<>(aNum, bNum - aNum);
     }
 
-    public static boolean assertSubmitNums(int[] submit) {
-        return submit != null && submit.length == CONTENT_COUNT;
-    }
 
+    @Nullable
     public static int[] parseString2IntArray(String string) {
         int[] result = null;
         if (TextUtils.isEmpty(string) || string.length() != 4) {
@@ -66,8 +68,21 @@ public class GameUtils {
         return result;
     }
 
+    @Nullable
+    public static String parseIntArray2String(int[] input){
+        if(assertSubmitUnit(input)){
+            StringBuilder builder = new StringBuilder("");
+            for(Integer integer : input){
+                builder.append(integer);
+            }
+            return builder.toString();
+        }
+        return null;
+    }
+
     /**
      * 创建所有的数据
+     *
      * @return
      */
     public static List<int[]> makeAllData() {
@@ -96,19 +111,54 @@ public class GameUtils {
         return set.size() == 4;
     }
 
+    /**
+     * 比较两个提交结果是否一致
+     *
+     * @param firstSubmit
+     * @param secondSubmit
+     * @return
+     */
+    public static boolean submitResultEquals(Pair<Integer, Integer> firstSubmit, Pair<Integer, Integer> secondSubmit) {
+        return firstSubmit != null
+                && secondSubmit != null
+                && firstSubmit.first == secondSubmit.first
+                && firstSubmit.second == secondSubmit.second;
+    }
 
-    public static List<int[]> filter(int[] result, List<int[]> data) {
-        //默认计算第一个的结果
-        int[] firstOne = data.get(0);
-        Pair<Integer, Integer> firstSubmit = calResultForEachSubmit(firstOne, result);
+    /**
+     * 断言一个提交记录
+     *
+     * @param result
+     * @return
+     */
+    public static boolean assertSubmitUnit(int[] result) {
+        return result != null && result.length == 4;
+    }
+
+    /**
+     * 每次用户提交用于校验并生成对应的待定答案集合
+     *
+     * @param result 答案数组
+     * @param input  输入数组
+     * @param data   剩余可待验证的答案集合
+     * @return
+     */
+    @Nullable
+    public static SubmitFeedBack makeRecommendInput(int[] result, int[] input, List<int[]> data) {
+        if (!assertSubmitUnit(result) || !assertSubmitUnit(input) || data == null) {
+            return null;
+        }
+        Pair<Integer, Integer> inputResult = calResultForEachSubmit(input, result);
+        if (inputResult != null && inputResult.first == 4) {
+            return new SubmitFeedBack(true, inputResult);
+        }
         for (int i = 0; i < data.size(); i++) {
             int[] item = data.get(i);
-            Pair<Integer, Integer> itemSubmit = calResultForEachSubmit(item, result);
-            if (firstSubmit != null && itemSubmit != null && firstSubmit.first == itemSubmit.first && firstSubmit.second == firstSubmit.second) {
+            if (!submitResultEquals(inputResult, calResultForEachSubmit(item, input))) {
                 data.remove(i);
                 i--;
             }
         }
-        return data;
+        return new SubmitFeedBack(false, inputResult, data, data.get(0));
     }
 }

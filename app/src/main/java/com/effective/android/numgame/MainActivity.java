@@ -5,7 +5,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -15,6 +17,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.effective.android.numgame.adapter.SubmitAdapter;
+import com.effective.android.numgame.bean.SubmitFeedBack;
 import com.effective.android.numgame.bean.SubmitItem;
 import com.effective.android.numgame.util.GameUtils;
 import com.effective.android.numgame.util.ShuffleSoreUtils;
@@ -51,6 +54,26 @@ public class MainActivity extends AppCompatActivity {
         mResultHandler = findViewById(R.id.provide);
         mSubmit = findViewById(R.id.submit);
         mInput = findViewById(R.id.input);
+        mInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                int currentInputLength = s.toString().length();
+                mSubmit.setEnabled(currentInputLength == 4);
+                if (currentInputLength > 4) {
+                    s.delete(4, currentInputLength);
+                }
+            }
+        });
     }
 
     private void initListener() {
@@ -73,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
                     submitString.append(integer + ",");
                 }
                 submitString.delete(submitString.length() - 1, submitString.length());
+                submitString.append("]");
                 Toast.makeText(MainActivity.this, "答案 " + submitString.toString(), Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -85,41 +109,39 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 String input = mInput.getText().toString();
-                if (TextUtils.isEmpty(input)) {
-                    testAll();
-                    Toast.makeText(MainActivity.this, "输入不能为空", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                int[] submit = GameUtils.parseString2IntArray(input);
-                if (GameUtils.assertSubmitNums(submit)) {
-                    Pair<Integer, Integer> submitResult = GameUtils.calResultForEachSubmit(submit, result);
-                    if (submitResult.first == 4) {
+                int[] submitInput = GameUtils.parseString2IntArray(input);
+                SubmitFeedBack submitFeedBack = GameUtils.makeRecommendInput(
+                        result,
+                        submitInput,
+                        allData);
+                mInput.setText("");
+                if(submitFeedBack != null){
+                    if (submitFeedBack.isSuccess()) {
                         isSuccess = true;
+                        mInput.setHint("重置随机数开启下一盘！");
                         Toast.makeText(MainActivity.this, "恭喜你回答正确", Toast.LENGTH_SHORT).show();
+                    }else{
+                        String recommendString = GameUtils.parseIntArray2String(submitFeedBack.getRecommendInput());
+                        if(!TextUtils.isEmpty(recommendString)){
+                            mInput.setHint("推荐下次输入：" + recommendString);
+                        }
                     }
-                    mSubmitAdapter.insertItem(new SubmitItem(submit, submitResult));
-                    mInput.setText("");
-                } else {
-                    Toast.makeText(MainActivity.this, "请确保输入4个数字", Toast.LENGTH_SHORT).show();
+                    String message = null;
+                    if(submitFeedBack.getAfterFilterData() != null){
+                        message = " 当前约束项剩下为：" + submitFeedBack.getAfterFilterData().size();
+                    }
+
+                    mSubmitAdapter.insertItem(new SubmitItem(submitInput, submitFeedBack.getSubmitResult(),message));
                 }
             }
         });
-    }
-
-    private void testAll() {
-        Log.d("MainActivity", "当前有数据： " + allData.size());
-        allData = GameUtils.filter(result, allData);
-        if (allData.size() > 0) {
-            int[] item = allData.get(0);
-            Log.d("MainActivity", "建议下次读取： " + "[" + item[0] + item[1] + item[2] + item[3] + "]");
-        }
-
     }
 
     private void initData() {
         mSubmitAdapter = new SubmitAdapter(this);
         mSubmitList.setAdapter(mSubmitAdapter);
         result = ShuffleSoreUtils.makeRandomResult();
+        allData = GameUtils.makeAllData();
     }
 
 }

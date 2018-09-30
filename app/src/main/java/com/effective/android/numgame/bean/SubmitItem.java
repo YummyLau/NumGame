@@ -13,8 +13,12 @@ public class SubmitItem {
 
     public Pair<Integer, Integer> abResult;
 
-    public SubmitItem(int[] data, Pair<Integer, Integer> abResult) {
+    public String message;
+
+    public SubmitItem(int[] data, Pair<Integer, Integer> abResult, String message) {
         this.data = data;
         this.abResult = abResult;
+        this.message = message;
     }
+
 }
