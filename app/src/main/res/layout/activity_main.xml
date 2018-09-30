@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/provide"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:height="50dp"
+        android:gravity="center"
+        android:text="重置随机数(长按查看答案)" />
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_above="@+id/input_layout"
+        android:layout_marginTop="10dp"
+        android:id="@+id/submit_list"
+        android:layout_below="@+id/provide"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:id="@+id/input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <EditText
+            android:hint="输入4个数字"
+            android:id="@+id/input"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/submit"
+            android:digits="0123456789"
+            android:maxEms="4"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:background="@drawable/sh_input"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/submit"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:height="50dp"
+            android:gravity="center"
+            android:text="猜数" />
+
+    </LinearLayout>
+
+</RelativeLayout>
