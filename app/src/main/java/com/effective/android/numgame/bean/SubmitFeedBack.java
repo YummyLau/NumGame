@@ -16,6 +16,7 @@ public class SubmitFeedBack {
     Pair<Integer, Integer> submitResult;
     List<int[]> afterFilterData;
     int[] recommendInput;
+    private int lastCount;
 
     public SubmitFeedBack(boolean isSuccess, Pair<Integer, Integer> submitResult) {
         this.isSuccess = isSuccess;
@@ -27,6 +28,18 @@ public class SubmitFeedBack {
         this.submitResult = submitResult;
         this.afterFilterData = afterFilterData;
         this.recommendInput = recommendInput;
+    }
+
+    public SubmitFeedBack(boolean isSuccess, Pair<Integer, Integer> submitResult, List<int[]> afterFilterData, int[] recommendInput,int lastCount) {
+        this.isSuccess = isSuccess;
+        this.submitResult = submitResult;
+        this.afterFilterData = afterFilterData;
+        this.recommendInput = recommendInput;
+        this.lastCount = lastCount;
+    }
+
+    public int getLastCount() {
+        return lastCount;
     }
 
     public List<int[]> getAfterFilterData() {

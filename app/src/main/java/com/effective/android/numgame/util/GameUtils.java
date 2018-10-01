@@ -1,12 +1,9 @@
 package com.effective.android.numgame.util;
 
-import android.net.wifi.aware.PublishConfig;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Pair;
-
-import com.effective.android.numgame.bean.SubmitFeedBack;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,13 +11,25 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 游戏助手
+ * 创建随机答案
  * created bg yummylau
  * 2018-09-30
  */
 public class GameUtils {
 
-    private static final int CONTENT_COUNT = 4;
+    private static final int[] ORIGIN = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    public static final int CONTENT_COUNT = 4;
+    public static final int ALL_SUBMIT_NUM = 10 * 9 * 8 * 7;
+
+    /**
+     * 断言一个提交记录
+     *
+     * @param result
+     * @return
+     */
+    public static boolean assertSubmitUnit(int[] result) {
+        return result != null && result.length == 4;
+    }
 
     /**
      * 计算每次猜测有多少A和多少B
@@ -50,34 +59,49 @@ public class GameUtils {
         return new Pair<>(aNum, bNum - aNum);
     }
 
+    /**
+     * 比较两个提交结果是否一致
+     *
+     * @param firstSubmit
+     * @param secondSubmit
+     * @return
+     */
+    public static boolean submitResultEquals(Pair<Integer, Integer> firstSubmit, Pair<Integer, Integer> secondSubmit) {
+        return firstSubmit != null
+                && secondSubmit != null
+                && firstSubmit.first == secondSubmit.first
+                && firstSubmit.second == secondSubmit.second;
+    }
 
-    @Nullable
-    public static int[] parseString2IntArray(String string) {
-        int[] result = null;
-        if (TextUtils.isEmpty(string) || string.length() != 4) {
-            return result;
+
+    @NonNull
+    public static int[] makeRandomResult() {
+        for (int i = 0; i < ORIGIN.length - 1; i++) {
+            int j = (int) (ORIGIN.length * Math.random());
+            swap(ORIGIN, i, j);
         }
-        result = new int[CONTENT_COUNT];
-        for (int i = 0; i < CONTENT_COUNT; i++) {
-            try {
-                result[i] = Integer.parseInt(string.substring(i, i + 1));
-            } catch (Exception e) {
-                return null;
-            }
-        }
+        int[] result = new int[4];
+        result[0] = ORIGIN[0];
+        result[1] = ORIGIN[1];
+        result[2] = ORIGIN[2];
+        result[3] = ORIGIN[3];
         return result;
     }
 
-    @Nullable
-    public static String parseIntArray2String(int[] input){
-        if(assertSubmitUnit(input)){
-            StringBuilder builder = new StringBuilder("");
-            for(Integer integer : input){
-                builder.append(integer);
-            }
-            return builder.toString();
+    /**
+     * 交换两个数组
+     *
+     * @param data
+     * @param i
+     * @param j
+     */
+    private static void swap(int[] data, int i, int j) {
+        if (data == null || data.length <= j || data.length <= i || i < 0 || j < 0 || i == j) {
+            return;
         }
-        return null;
+        data[i] = data[i] + data[j];
+        data[j] = data[i] - data[j];
+        data[i] = data[i] - data[j];
     }
 
     /**
@@ -102,7 +126,7 @@ public class GameUtils {
         return allData;
     }
 
-    private static boolean isDifferentNum(int i, int j, int k, int l) {
+    public static boolean isDifferentNum(int i, int j, int k, int l) {
         Set<Integer> set = new HashSet<>();
         set.add(i);
         set.add(j);
@@ -111,54 +135,33 @@ public class GameUtils {
         return set.size() == 4;
     }
 
-    /**
-     * 比较两个提交结果是否一致
-     *
-     * @param firstSubmit
-     * @param secondSubmit
-     * @return
-     */
-    public static boolean submitResultEquals(Pair<Integer, Integer> firstSubmit, Pair<Integer, Integer> secondSubmit) {
-        return firstSubmit != null
-                && secondSubmit != null
-                && firstSubmit.first == secondSubmit.first
-                && firstSubmit.second == secondSubmit.second;
-    }
 
-    /**
-     * 断言一个提交记录
-     *
-     * @param result
-     * @return
-     */
-    public static boolean assertSubmitUnit(int[] result) {
-        return result != null && result.length == 4;
-    }
-
-    /**
-     * 每次用户提交用于校验并生成对应的待定答案集合
-     *
-     * @param result 答案数组
-     * @param input  输入数组
-     * @param data   剩余可待验证的答案集合
-     * @return
-     */
     @Nullable
-    public static SubmitFeedBack makeRecommendInput(int[] result, int[] input, List<int[]> data) {
-        if (!assertSubmitUnit(result) || !assertSubmitUnit(input) || data == null) {
-            return null;
+    public static int[] parseString2IntArray(String string) {
+        int[] result = null;
+        if (TextUtils.isEmpty(string) || string.length() != 4) {
+            return result;
         }
-        Pair<Integer, Integer> inputResult = calResultForEachSubmit(input, result);
-        if (inputResult != null && inputResult.first == 4) {
-            return new SubmitFeedBack(true, inputResult);
-        }
-        for (int i = 0; i < data.size(); i++) {
-            int[] item = data.get(i);
-            if (!submitResultEquals(inputResult, calResultForEachSubmit(item, input))) {
-                data.remove(i);
-                i--;
+        result = new int[CONTENT_COUNT];
+        for (int i = 0; i < CONTENT_COUNT; i++) {
+            try {
+                result[i] = Integer.parseInt(string.substring(i, i + 1));
+            } catch (Exception e) {
+                return null;
             }
         }
-        return new SubmitFeedBack(false, inputResult, data, data.get(0));
+        return result;
+    }
+
+    @Nullable
+    public static String parseIntArray2String(int[] input){
+        if(GameUtils.assertSubmitUnit(input)){
+            StringBuilder builder = new StringBuilder("");
+            for(Integer integer : input){
+                builder.append(integer);
+            }
+            return builder.toString();
+        }
+        return null;
     }
 }
