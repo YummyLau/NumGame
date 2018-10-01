@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
         initView();
         initListener();
         initData();
-        test5000Games(true,100);
     }
 
     private void initView() {
