@@ -158,3 +158,7 @@
 程序跑得比较慢，其中在变量计算信息熵的时候，应该还有很大的优化空间。不过方向上应该是对的。
 由于时间比较紧，暂时优化到当前场景。
 代码存放在githu上，欢迎讨论和意见交流。
+[点击下载测试app](https://github.com/YummyLau/NumGame/blob/master/doc/app-debug.apk?raw=true)
+测试运行图
+<img src="https://raw.githubusercontent.com/YummyLau/NumGame/master/doc/device-2018-10-01-190051.png" width = "540" height = "960" alt="activity layout" align=center />
+
